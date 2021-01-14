@@ -14,7 +14,7 @@ public class Categoria implements Serializable{
 	
 	@Id //dizendo ao jpa que esse campo sera a PK e a mesma sera gerada automaticamente
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+	private Integer id; 
 	private String name;
 	
 	public Categoria() {
