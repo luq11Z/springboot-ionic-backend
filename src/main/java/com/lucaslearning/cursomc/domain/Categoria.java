@@ -2,10 +2,18 @@ package com.lucaslearning.cursomc.domain;
 
 import java.io.Serializable;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity //dizendo ao jpa que essa clase vai ser uma tabela na bd
 public class Categoria implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
+	@Id //dizendo ao jpa que esse campo sera a PK e a mesma sera gerada automaticamente
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	private String name;
 	
