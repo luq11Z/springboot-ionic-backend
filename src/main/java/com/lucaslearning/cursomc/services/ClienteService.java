@@ -9,10 +9,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.lucaslearning.cursomc.domain.Cidade;
 import com.lucaslearning.cursomc.domain.Cliente;
+import com.lucaslearning.cursomc.domain.Endereco;
+import com.lucaslearning.cursomc.domain.enums.TipoCliente;
 import com.lucaslearning.cursomc.dto.ClienteDTO;
+import com.lucaslearning.cursomc.dto.ClienteNewDTO;
 import com.lucaslearning.cursomc.repositories.ClienteRepository;
+import com.lucaslearning.cursomc.repositories.EnderecoRepository;
 import com.lucaslearning.cursomc.services.exceptions.DataIntegrityException;
 import com.lucaslearning.cursomc.services.exceptions.ObjectNotFoundException;
 
@@ -22,15 +28,21 @@ public class ClienteService {
 	@Autowired
 	private ClienteRepository repository;
 	
+	@Autowired
+	private EnderecoRepository endeRepository;
+	
 	public Cliente find(Integer id) {
 		Optional<Cliente> obj = repository.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				 "Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente .class.getName()));
 	}
 	
+	@Transactional
 	public Cliente insert(Cliente obj) {
 		obj.setId(null);
-		return repository.save(obj);
+		obj = repository.save(obj);
+		endeRepository.saveAll(obj.getEnderecos());
+		return obj;
 	}
 	
 	public Cliente update(Cliente obj) {
@@ -59,6 +71,23 @@ public class ClienteService {
 	
 	public Cliente fromDTo(ClienteDTO objDto) {
 		return new Cliente(objDto.getId(), objDto.getNome(), objDto.getEmail(), null, null); //instancia uma categoria a partir de um DTO
+	}
+	
+	public Cliente fromDTo(ClienteNewDTO objDto) {
+		Cliente cli = new Cliente(null, objDto.getNome(), objDto.getEmail(), objDto.getCpfOuCnpj(), 
+				TipoCliente.toEnum(objDto.getTipo()));
+		Cidade cid = new Cidade(objDto.getCidadeId(), null, null);
+		Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(), 
+				objDto.getBairro(), objDto.getCep(), cli, cid);
+		cli.getEnderecos().add(end);
+		cli.getTelefones().add(objDto.getTelefone1());
+		if(objDto.getTelefone2() != null) {
+			cli.getTelefones().add(objDto.getTelefone2());
+		}
+		if(objDto.getTelefone3() != null) {
+			cli.getTelefones().add(objDto.getTelefone3());
+		}
+		return cli; 
 	}
 	
 	/*	Metodo para atualizar um cliente com base nos dados recebidos
