@@ -1,11 +1,26 @@
 package com.lucaslearning.cursomc.repositories;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.lucaslearning.cursomc.domain.Categoria;
 import com.lucaslearning.cursomc.domain.Produto;
 
 @Repository //essa interface vai acessar a bd com base no tipo que for passado nesse caso e a categoria 
 public interface ProdutoRepository extends JpaRepository<Produto, Integer>{
-
+	
+	/*
+	@Query("SELECT DISTINCT obj FROM Produto obj "
+			+ "INNER JOIN obj.categorias cat WHERE obj.nome LIKE %:nome% AND cat IN :categorias")
+	Page<Produto> search(@Param("nome") String nome, @Param("categorias") List<Categoria> categorias, Pageable pageRequest);
+	*/
+	
+	@Transactional(readOnly = true)
+	Page<Produto> findDistinctByNomeContainingAndCategoriasIn(String nome, List<Categoria> categorias, Pageable pageRequest);
+	
 }
